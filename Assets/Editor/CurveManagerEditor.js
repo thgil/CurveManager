@@ -8,11 +8,26 @@ enum OPTIONS {
 @CustomEditor (CurveManager)
 class CurveManagerEditor extends Editor {
 
-	var op : OPTIONS;
-	var point : Vector3;
+	var op : OPTIONS; 
+	var pointsData : Vector3[]; //Contains points on curves
+
+	var dirty = true; //Do we need to recalculate the curve?
 
 	function OnInspectorGUI () {
 
+		op = EditorGUILayout.EnumPopup("Select type of curve:", op);
+
+		if(dirty) {
+			switch(target.op) {
+		      case target.OPTIONS.Line:
+		      	dirty = true;
+		        break;
+		      case target.OPTIONS.BezierCurve:
+		        if(dirty)pointsData = BezierCurve(target.points);
+		        dirty = true;
+		        break;
+		    }
+		}
 	}
 
 	function OnSceneGUI () {
