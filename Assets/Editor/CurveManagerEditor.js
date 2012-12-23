@@ -9,7 +9,7 @@ enum OPTIONS {
 class CurveManagerEditor extends Editor {
 
 	var op : OPTIONS; 
-	var pointsData : Vector3[]; //Contains points on curves
+	var pointsData = new Array(); //Contains points on curves
 
 	var dirty = true; //Do we need to recalculate the curve?
 
@@ -18,13 +18,14 @@ class CurveManagerEditor extends Editor {
 		op = EditorGUILayout.EnumPopup("Select type of curve:", op);
 
 		if(dirty) {
-			switch(target.op) {
-		      case target.OPTIONS.Line:
-		      	dirty = true;
+			switch(op) {
+		      case OPTIONS.Line:
+		      	dirty = false;
 		        break;
-		      case target.OPTIONS.BezierCurve:
-		        if(dirty)pointsData = BezierCurve(target.points);
-		        dirty = true;
+		      case OPTIONS.BezierCurve:
+		      	var dt = 0.1; // Size of step
+		        if(dirty)pointsData = BezierCurve(target.points,dt);
+		        dirty = false;
 		        break;
 		    }
 		}

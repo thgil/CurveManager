@@ -1,6 +1,6 @@
 #pragma strict
 
-var pointData : Vector3[];
+var points = new Array(); // Contains waypoints
 
 function Start () {
 
