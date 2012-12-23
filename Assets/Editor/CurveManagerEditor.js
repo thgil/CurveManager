@@ -17,6 +17,9 @@ class CurveManagerEditor extends Editor {
 
 		op = EditorGUILayout.EnumPopup("Select type of curve:", op);
 
+		for (var i=0; i<target.points.length; i++) {
+      		target.points[i] = EditorGUILayout.Vector3Field("Waypoint "+i+":", target.points[i]);
+		}
 		if(dirty) {
 			switch(op) {
 		      case OPTIONS.Line:
