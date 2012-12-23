@@ -1,9 +1,14 @@
 #pragma strict
 
-function Start () {
+@CustomEditor (CurveManager)
+class CurveManagerEditor extends Editor {
 
-}
+	function OnInspectorGUI () {
+		
+	}
 
-function Update () {
+	function OnSceneGUI () {
+
+	}
 
 }
