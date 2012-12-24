@@ -10,10 +10,9 @@ class CurveManagerEditor extends Editor {
 	static var op : OPTIONS; 
 	//var pointsData = new Array(); //Contains points on curves
 	var fastData :Vector3[]; //Builtin array
-
 	var dirty = true; //Do we need to recalculate the curve?
-
 	var selected = 0; //Selected point. -1 for all
+	var dt = 0.1; // Size of step
 
 	function OnInspectorGUI () {
 
@@ -23,11 +22,13 @@ class CurveManagerEditor extends Editor {
 		      target.points.Add(point);
 		      dirty = true;
 		    }
-		    //Select All button
-	      	if(GUILayout.Button ("Select All")) selected = -1;
 
 			op = EditorGUILayout.EnumPopup("Select type of curve:", op);
 		EditorGUILayout.EndHorizontal();
+		EditorGUILayout.BeginHorizontal();
+				    //Select All button
+	      	if(GUILayout.Button ("Select All")) selected = -1;
+	    EditorGUILayout.EndHorizontal();
 
 		EditorGUILayout.BeginVertical();
 			for (var i=0; i<target.points.length; i++) {
@@ -52,13 +53,13 @@ class CurveManagerEditor extends Editor {
 		if(dirty) {
 			switch(op) {
 		      case OPTIONS.Line:
-		      	if(dirty)target.pointsData = new Array(Line(target.points));
+		      	Debug.Log("Calculating Line with "+target.points.length+" points.");
+		      	target.pointsData = new Array(Line(target.points,dt));
 		      	dirty = false;
 		        break;
 		      case OPTIONS.BezierCurve:
 		      	Debug.Log("Calculating BezierCurve with "+target.points.length+" points.");
-		      	var dt = 0.1; // Size of step
-		        if(dirty)target.pointsData = new Array(BezierCurve(target.points,dt));
+		        target.pointsData = new Array(BezierCurve(target.points,dt));
 		        dirty = false;
 		        break;
 		    }
@@ -74,14 +75,25 @@ class CurveManagerEditor extends Editor {
 		//Curve Line Render
 		//if(dirty)fastData = target.pointsData.ToBuiltin(Vector3);
 		//Handles.DrawAAPolyLine(fastData);
-
-		Debug.Log("Current detected event: " + Event.current);
-
+		var i;
+		var e : Event = Event.current;
+		Debug.Log("mp:"+e.mousePosition);
+        var ray : Ray = Camera.current.ViewportPointToRay (e.mousePosition);
+        Debug.DrawRay(ray.origin, ray.direction*10, Color.green);
 		//Handles
-		for (var i=0; i< target.points.length; i++) {
+		for (i=0; i< target.points.length; i++) {
       		Handles.Label(target.points[i] + Vector3.up*2,"Waypoint "+i);
       		if(selected==i||selected ==-1)target.points[i] = Handles.PositionHandle (target.points[i], Quaternion.identity);
     	}
+
+    	for (i=0; i< target.pointsData.length; i++) {
+      		Handles.color = Color.red;
+       		Handles.CubeCap(0,
+            	target.pointsData[i],
+            	Quaternion.identity,
+            	0.5);
+    	}
+
 
 		if (GUI.changed)  {
 			dirty=true;
@@ -89,13 +101,17 @@ class CurveManagerEditor extends Editor {
 		}
 	}
 
-	function Line (points) {
-		return points;
+	function Line (points, dt:float) : Array{
+		var data = new Array();
+		for (var i =0; i< target.points.length-1; i++) {
+			for(var t=0.0; t<1.1; t+=dt) data.Add( points[i] + t *(points[i+1]-points[i]) );
+		}
+		return data;
 	}
 
 	function BezierCurve(points, dt:float) : Array {
 		var data = new Array();
-		for( var t =0.0; t<1.0; t+=dt) data.Add( BezierPointOnCurve(points,t) );
+		for( var t =0.0; t<1.1; t+=dt) data.Add( BezierPointOnCurve(points,t) );
 		return data;
 	}
 
@@ -107,7 +123,7 @@ class CurveManagerEditor extends Editor {
       var tmp1 = new Array(points);
       var tmp2 = new Array(points);
       tmp1.RemoveAt(points.length-1);
-      tmp2.ReraymoveAt(0);
+      tmp2.RemoveAt(0);
 
       return (1-t)*BezierPointOnCurve(tmp1,t) + t*BezierPointOnCurve(tmp2,t);
     }
