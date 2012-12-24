@@ -7,8 +7,8 @@ class CurveManagerEditor extends Editor {
     	BezierCurve = 1
   	}
 
-	var op : OPTIONS; 
-	var pointsData = new Array(); //Contains points on curves
+	static var op : OPTIONS; 
+	//var pointsData = new Array(); //Contains points on curves
 	var fastData :Vector3[]; //Builtin array
 
 	var dirty = true; //Do we need to recalculate the curve?
@@ -32,6 +32,10 @@ class CurveManagerEditor extends Editor {
 			//Vector3 edit fields 
       		target.points[i] = EditorGUILayout.Vector3Field("Waypoint "+i+":", target.points[i]);
       		EditorGUILayout.EndHorizontal();
+      		if (GUI.changed)  {
+				dirty=true;
+				EditorUtility.SetDirty (target);
+			}
 		}
 		EditorGUILayout.EndVertical();
 
@@ -42,25 +46,39 @@ class CurveManagerEditor extends Editor {
 		      	dirty = false;
 		        break;
 		      case OPTIONS.BezierCurve:
+		      	Debug.Log("Calculating BezierCurve with "+target.points.length+" points.");
 		      	var dt = 0.1; // Size of step
-		        if(dirty)pointsData = BezierCurve(target.points,dt);
+		        if(dirty)target.pointsData = new Array(BezierCurve(target.points,dt));
 		        dirty = false;
 		        break;
 		    }
 		}
 
-		if (GUI.changed)  EditorUtility.SetDirty (target);
+		if (GUI.changed)  {
+			dirty=true;
+			EditorUtility.SetDirty (target);
+		}
 	}
 
 	function OnSceneGUI () {
+		//Curve Line Render
+		//if(dirty)fastData = target.pointsData.ToBuiltin(Vector3);
+		//Handles.DrawAAPolyLine(fastData);
 
-		if(dirty)fastData = pointsData.ToBuiltin(Vector3);
-		Handles.DrawAAPolyLine(fastData);
-		
+		//Handles
+		for (var i=0; i< target.points.length; i++) {
+      		Handles.Label(target.points[i] + Vector3.up*2,"Waypoint "+i);
+      		target.points[i] = Handles.PositionHandle (target.points[i], Quaternion.identity);
+    	}
+
+		if (GUI.changed)  {
+			dirty=true;
+			EditorUtility.SetDirty (target);
+		}
 	}
 
-	function BezierCurve(points, dt:float) {
-		var data : Vector3[];
+	function BezierCurve(points, dt:float) : Array {
+		var data = new Array();
 		for( var t =0.0; t<1.0; t+=dt) data.Add( BezierPointOnCurve(points,t) );
 		return data;
 	}
