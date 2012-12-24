@@ -18,10 +18,15 @@ class CurveManagerEditor extends Editor {
 
 		EditorGUILayout.BeginHorizontal();
 			if(GUILayout.Button ("Add Point")) {
-		      var point = Vector3.zero;
-		      target.points.Add(point);
-		      dirty = true;
-		    }
+				var go : GameObject = new GameObject ("point");
+				go.transform.parent = target.transform;
+				go.transform.localPosition = Vector3.zero;
+				go.AddComponent ("Point");
+
+				var point = Vector3.zero;
+				target.points.Add(point);
+				dirty = true;
+			}
 
 			op = EditorGUILayout.EnumPopup("Select type of curve:", op);
 		EditorGUILayout.EndHorizontal();
@@ -76,22 +81,20 @@ class CurveManagerEditor extends Editor {
 		//if(dirty)fastData = target.pointsData.ToBuiltin(Vector3);
 		//Handles.DrawAAPolyLine(fastData);
 		var i;
-		var e : Event = Event.current;
-		Debug.Log("mp:"+e.mousePosition);
-        var ray : Ray = Camera.current.ViewportPointToRay (e.mousePosition);
-        Debug.DrawRay(ray.origin, ray.direction*10, Color.green);
 		//Handles
 		for (i=0; i< target.points.length; i++) {
       		Handles.Label(target.points[i] + Vector3.up*2,"Waypoint "+i);
       		if(selected==i||selected ==-1)target.points[i] = Handles.PositionHandle (target.points[i], Quaternion.identity);
     	}
 
+		var allChildren = target.GetComponentsInChildren(Transform);
+		for (var child : Transform in allChildren) {
+			child.transform.position = Handles.PositionHandle (child.transform.position, Quaternion.identity);
+		}
+
     	for (i=0; i< target.pointsData.length; i++) {
       		Handles.color = Color.red;
-       		Handles.CubeCap(0,
-            	target.pointsData[i],
-            	Quaternion.identity,
-            	0.5);
+       		Handles.CubeCap(0, target.pointsData[i], Quaternion.identity, 0.1);
     	}
 
 
@@ -101,7 +104,7 @@ class CurveManagerEditor extends Editor {
 		}
 	}
 
-	function Line (points, dt:float) : Array{
+	function Line (points, dt:float) : Array {
 		var data = new Array();
 		for (var i =0; i< target.points.length-1; i++) {
 			for(var t=0.0; t<1.1; t+=dt) data.Add( points[i] + t *(points[i+1]-points[i]) );

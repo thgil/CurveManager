@@ -1,5 +1,7 @@
 //#pragma strict
 
+@script AddComponentMenu ("Paths/CurveManger")
+
 var points = new Array(); // Contains waypoints
 var pointsData = new Array(); //Contains points on curves
 
