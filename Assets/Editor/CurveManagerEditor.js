@@ -1,93 +1,71 @@
 //#pragma strict
 @CustomEditor (CurveManager)
 class CurveManagerEditor extends Editor {
-
-	enum OPTIONS {
-    	Line = 0,
-    	BezierCurve = 1
-  	}
-
-	static var op : OPTIONS; 
-	//var pointsData = new Array(); //Contains points on curves
-	var fastData :Vector3[]; //Builtin array
-	var dirty = true; //Do we need to recalculate the curve?
-	var selected = 0; //Selected point. -1 for all
-	var dt = 0.1; // Size of step
-
+ 
 	function OnInspectorGUI () {
+
+		//CleanUp();
 
 		EditorGUILayout.BeginHorizontal();
 			if(GUILayout.Button ("Add Point")) {
-				
-				var point = target.transform.position;
-				target.points.Add(point);
-				dirty = true;
+				var go : GameObject = new GameObject ("point");
+				go.transform.parent = target.transform;
+				go.transform.localPosition = Vector3.zero;
+				go.AddComponent ("Point");
+
+				target.points.Add(go);
+				target.dirty = true;
 			}
 
-			op = EditorGUILayout.EnumPopup("Select type of curve:", op);
+			target.op = EditorGUILayout.EnumPopup("Select type of curve:", target.op);
 		EditorGUILayout.EndHorizontal();
-		EditorGUILayout.BeginHorizontal();
-				    //Select All button
-	      	if(GUILayout.Button ("Select All")) selected = -1;
-	    EditorGUILayout.EndHorizontal();
 
 		EditorGUILayout.BeginVertical();
 			for (var i=0; i<target.points.length; i++) {
 				EditorGUILayout.BeginHorizontal();
 					//Vector3 edit fields 
-		      		target.points[i] = EditorGUILayout.Vector3Field("Waypoint "+i+":", target.points[i]);
+		      		target.points[i].transform.position = EditorGUILayout.Vector3Field("Waypoint "+i+":", target.points[i].transform.position);
 
 		      		//Select button
-		      		if(GUILayout.Button ("Select")) selected = i;
+		      		if(GUILayout.Button ("Select")) Selection.activeTransform = target.points[i].transform;
+
 
 		      		//Remove point button
-					if(GUILayout.Button ("-")) target.points.RemoveAt(i);
+					if(GUILayout.Button ("-")) {
+						DestroyImmediate(target.points[i]);
+						target.points.RemoveAt(i);
+					}
 	      		EditorGUILayout.EndHorizontal();
 	      		if (GUI.changed)  {
-					dirty=true;
+					target.dirty=true;
 					EditorUtility.SetDirty (target);
 				}
 			}
 		EditorGUILayout.EndVertical();
 
+		if (GUI.changed)  {
+			target.dirty=true;
+			EditorUtility.SetDirty (target);
+		}
 
-		if(dirty) {
+		/*if(target.dirty) {
 			switch(op) {
 		      case OPTIONS.Line:
 		      	Debug.Log("Calculating Line with "+target.points.length+" points.");
 		      	target.pointsData = new Array(Line(target.points,dt));
-		      	dirty = false;
+		      	target.dirty = false;
 		        break;
 		      case OPTIONS.BezierCurve:
 		      	Debug.Log("Calculating BezierCurve with "+target.points.length+" points.");
 		        target.pointsData = new Array(BezierCurve(target.points,dt));
-		        dirty = false;
+		    	target.dirty = false;
 		        break;
 		    }
-		}
-
-		if (GUI.changed)  {
-			dirty=true;
-			EditorUtility.SetDirty (target);
-		}
+		}*/
 	}
 
 	function OnSceneGUI () {
-		//Curve Line Render
-	//	if(dirty)fastData = target.pointsData.ToBuiltin(Vector3);
-	//	Handles.DrawAAPolyLine(fastData);
-		var i;
-		//Handles
-		for (i=0; i< target.points.length; i++) {
-      		Handles.Label(target.points[i] + Vector3.up*2,"Waypoint "+i);
-      		if(selected==i||selected ==-1)target.points[i] = Handles.PositionHandle (target.points[i], Quaternion.identity);
-    	}
-
-		var allChildren = target.GetComponentsInChildren(Transform);
-		for (var child : Transform in allChildren) {
-			child.transform.position = Handles.PositionHandle (child.transform.position, Quaternion.identity);
-		}
-
+	
     	for (i=0; i< target.pointsData.length; i++) {
       		Handles.color = Color.red;
        		Handles.CubeCap(0, target.pointsData[i], Quaternion.identity, 0.1);
@@ -95,36 +73,10 @@ class CurveManagerEditor extends Editor {
 
 
 		if (GUI.changed)  {
-			dirty=true;
+			target.dirty=true;
 			EditorUtility.SetDirty (target);
 		}
 	}
 
-	function Line (points, dt:float) : Array {
-		var data = new Array();
-		for (var i =0; i< target.points.length-1; i++) {
-			for(var t=0.0; t<1.1; t+=dt) data.Add( points[i] + t *(points[i+1]-points[i]) );
-		}
-		return data;
-	}
 
-	function BezierCurve(points, dt:float) : Array {
-		var data = new Array();
-		for( var t =0.0; t<1.1; t+=dt) data.Add( BezierPointOnCurve(points,t) );
-		return data;
-	}
-
-	function BezierPointOnCurve(points, t:float) : Vector3 {
-    if(points.length<1) {Debug.Log("Bezier needs more points!"); return Vector3.zero;}
-    else if(points.length==1) return points[0];
-    else {
-    //Make this nicer.
-      var tmp1 = new Array(points);
-      var tmp2 = new Array(points);
-      tmp1.RemoveAt(points.length-1);
-      tmp2.RemoveAt(0);
-
-      return (1-t)*BezierPointOnCurve(tmp1,t) + t*BezierPointOnCurve(tmp2,t);
-    }
-  }
 }
