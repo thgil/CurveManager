@@ -18,12 +18,8 @@ class CurveManagerEditor extends Editor {
 
 		EditorGUILayout.BeginHorizontal();
 			if(GUILayout.Button ("Add Point")) {
-				var go : GameObject = new GameObject ("point");
-				go.transform.parent = target.transform;
-				go.transform.localPosition = Vector3.zero;
-				go.AddComponent ("Point");
-
-				var point = Vector3.zero;
+				
+				var point = target.transform.position;
 				target.points.Add(point);
 				dirty = true;
 			}
@@ -45,7 +41,7 @@ class CurveManagerEditor extends Editor {
 		      		if(GUILayout.Button ("Select")) selected = i;
 
 		      		//Remove point button
-					if(GUILayout.Button ("-")) target.points.splice(i,1);
+					if(GUILayout.Button ("-")) target.points.RemoveAt(i);
 	      		EditorGUILayout.EndHorizontal();
 	      		if (GUI.changed)  {
 					dirty=true;
@@ -78,8 +74,8 @@ class CurveManagerEditor extends Editor {
 
 	function OnSceneGUI () {
 		//Curve Line Render
-		//if(dirty)fastData = target.pointsData.ToBuiltin(Vector3);
-		//Handles.DrawAAPolyLine(fastData);
+	//	if(dirty)fastData = target.pointsData.ToBuiltin(Vector3);
+	//	Handles.DrawAAPolyLine(fastData);
 		var i;
 		//Handles
 		for (i=0; i< target.points.length; i++) {
