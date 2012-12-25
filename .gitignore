@@ -1,5 +1,4 @@
-Library/
-ProjectSettings/
-Temp/
 *.dll
-*.mdb
+/Temp
+/Library
+/ProjectSettings
