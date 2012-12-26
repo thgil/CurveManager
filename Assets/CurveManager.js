@@ -52,27 +52,41 @@ function OnDrawGizmos () {
       Gizmos.DrawLine (pointsData[i], pointsData[i+1]);
     }
 
-    for (i=0; i< points.length-1; i++) {
+    for (i=0; i< points.length; i++) {
       Gizmos.color = Color.green;
-      Gizmos.DrawLine (points[i].transform.position, points[i+1].transform.position);
+      if(i!=points.length-1)Gizmos.DrawLine (points[i].transform.position, points[i+1].transform.position);
+      Handles.Label (points[i].transform.position + Vector3.up*2,"Waypoint "+i);
     }
 }
 
 
-// Checks that all gameobject still exist
+// Checks that all gameobject still exist.
+// Stops deletion of gameobjects manually in unity causing errors.
+// Forcefully removes any gameobject that may be left over
 function cleanUp () {
 	var i;
 	var ilength;
 	ilength = points.length;
 	for (i = 0; i < ilength; i++) {
-		Debug.Log("CLEANUP AT "+(i+1)+" OF "+ilength+" : "+ (points[i]==null));
 		if(points[i]==null) {
 			points.RemoveAt(i);
 			dirty = true;
 		}
 	}
+
+	
+	if(ilength==0) {
+		//var children = new List();
+		var child: Transform;
+		for (child in transform)
+			if(child.gameObject.name == "Point")
+		 		DestroyImmediate(child.gameobject);
+		//for (child in children) Destroy(child);
+		//children.ForEach(child => Destroy(child));
+	}
 }
 
+// Gets points for Line.
 function Line (points, dt:float) : Array {
 	var data = new Array();
 	for (var i =0; i< points.length-1; i++) {
@@ -81,12 +95,14 @@ function Line (points, dt:float) : Array {
 	return data;
 }
 
+// Gets points stepping dt each time.
 function BezierCurve(points, dt:float) : Array {
 	var data = new Array();
 	for( var t =0.0; t<1.1; t+=dt) data.Add( BezierPointOnCurve(points,t) );
 	return data;
 }
 
+// Gets point at time t.
 function BezierPointOnCurve(points, t:float) : Vector3 {
 	if(points.length<1) {Debug.Log("Bezier needs more points!"); return Vector3.zero;}
 	else if(points.length==1) return points[0].transform.position;

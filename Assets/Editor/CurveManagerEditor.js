@@ -3,15 +3,14 @@
 class CurveManagerEditor extends Editor {
  
 	function OnInspectorGUI () {
-
-		//CleanUp();
-
 		EditorGUILayout.BeginHorizontal();
 			if(GUILayout.Button ("Add Point")) {
-				var go : GameObject = new GameObject ("point");
+				var go : GameObject = new GameObject ("Point");
 				go.transform.parent = target.transform;
 				go.transform.localPosition = Vector3.zero;
 				go.AddComponent ("Point");
+
+				Selection.activeTransform = go.transform;
 
 				target.points.Add(go);
 				target.dirty = true;
