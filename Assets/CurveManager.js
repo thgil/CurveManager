@@ -10,9 +10,13 @@ enum OPTIONS {
 
 static var op : OPTIONS;
 var points = new Array(); // Contains waypoints
-var pointsData = new Array(); //Contains points on curves
-var dirty : boolean = true;
-var dt = 0.3; // Size of step
+var pointsData = new Array(); // Contains points on curves
+var attachedGameObjects = new Array(); // Contains gameobjects that will follow the path.
+
+var dirty : boolean = true; // Do we need to recalculate everything?
+var dt : float = 0.1; // Size of step
+
+// A easy way to see if we have moved
 var oldTransform;
 oldTransform = transform.position;
 

@@ -4,11 +4,11 @@ class CurveManagerEditor extends Editor {
  
  	var showPoints : boolean = true;
  	var showAttached : boolean = true;
-	var dt = 0.1;
 
 	function OnInspectorGUI () {
 
-		target.dt = dt;
+		//Slider for dt
+		target.dt = EditorGUILayout.Slider(target.dt,0.01, 1.0);
 
 		EditorGUILayout.BeginHorizontal();
 			if(GUILayout.Button ("Add Point")) {
@@ -80,6 +80,7 @@ class CurveManagerEditor extends Editor {
 	}
 
 	function ShowAttached () {
+		// Add game objects you want to move on this line here
 
 	}
 

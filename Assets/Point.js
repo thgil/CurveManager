@@ -2,6 +2,7 @@
 
 //@script AddComponentMenu ("Paths/Point")
 
+// A easy way to see if we have moved
 var oldTransform;
 oldTransform = transform.position;
 var myParent : CurveManager;
@@ -15,7 +16,9 @@ function Update () {
 }
 
 function OnDrawGizmos () {
-//draw labels
+
+	// Add button to each point so you can add extra points from the scene instead
+	// instead of going back and forth from scene to editor
 
 	if(oldTransform!=transform.position) {
 		oldTransform=transform.position;
