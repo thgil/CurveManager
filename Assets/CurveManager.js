@@ -11,8 +11,8 @@ enum OPTIONS {
 static var op : OPTIONS;
 var points = new Array(); // Contains waypoints
 var pointsData = new Array(); //Contains points on curves
-var dirty = true;
-var dt = 0.1; // Size of step
+var dirty : boolean = true;
+var dt = 0.3; // Size of step
 var oldTransform;
 oldTransform = transform.position;
 
@@ -90,7 +90,7 @@ function cleanUp () {
 function Line (points, dt:float) : Array {
 	var data = new Array();
 	for (var i =0; i< points.length-1; i++) {
-		for(var t=0.0; t<1.1; t+=dt) data.Add( points[i].transform.position + t *(points[i+1].transform.position-points[i].transform.position) );
+		for(var t=0.0; t<=1.0; t+=dt) data.Add( points[i].transform.position + t *(points[i+1].transform.position-points[i].transform.position) );
 	}
 	return data;
 }
@@ -98,7 +98,7 @@ function Line (points, dt:float) : Array {
 // Gets points stepping dt each time.
 function BezierCurve(points, dt:float) : Array {
 	var data = new Array();
-	for( var t =0.0; t<1.1; t+=dt) data.Add( BezierPointOnCurve(points,t) );
+	for( var t =0.0; t<=1.0; t+=dt) data.Add( BezierPointOnCurve(points,t) );
 	return data;
 }
 

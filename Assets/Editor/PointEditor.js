@@ -14,7 +14,7 @@ class PointEditor extends Editor {
 				Selection.activeTransform = go.transform;
 
 				target.myParent.points.Add(go);
-				target.dirty = true;
+				target.myParent.dirty = true;
 			}
 		EditorGUILayout.EndHorizontal();
 	}
