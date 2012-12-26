@@ -2,7 +2,14 @@
 @CustomEditor (CurveManager)
 class CurveManagerEditor extends Editor {
  
+ 	var showPoints : boolean = true;
+ 	var showAttached : boolean = true;
+	var dt = 0.1;
+
 	function OnInspectorGUI () {
+
+		target.dt = dt;
+
 		EditorGUILayout.BeginHorizontal();
 			if(GUILayout.Button ("Add Point")) {
 				var go : GameObject = new GameObject ("Point");
@@ -19,48 +26,18 @@ class CurveManagerEditor extends Editor {
 			target.op = EditorGUILayout.EnumPopup("Select type of curve:", target.op);
 		EditorGUILayout.EndHorizontal();
 
-		EditorGUILayout.BeginVertical();
-			for (var i=0; i<target.points.length; i++) {
-				EditorGUILayout.BeginHorizontal();
-					//Vector3 edit fields 
-		      		target.points[i].transform.position = EditorGUILayout.Vector3Field("Waypoint "+i+":", target.points[i].transform.position);
+		showPoints = EditorGUILayout.Foldout(showPoints, "Show Points");
+        if(showPoints) {
+			ShowPoints();
+		}
 
-		      		//Select button
-		      		if(GUILayout.Button ("Select")) Selection.activeTransform = target.points[i].transform;
-
-
-		      		//Remove point button
-					if(GUILayout.Button ("-")) {
-						DestroyImmediate(target.points[i]);
-						target.points.RemoveAt(i);
-					}
-	      		EditorGUILayout.EndHorizontal();
-	      		if (GUI.changed)  {
-					target.dirty=true;
-					EditorUtility.SetDirty (target);
-				}
-			}
-		EditorGUILayout.EndVertical();
-
+		if(showAttached) {
+			ShowAttached();
+		}
 		if (GUI.changed)  {
 			target.dirty=true;
 			EditorUtility.SetDirty (target);
 		}
-
-		/*if(target.dirty) {
-			switch(op) {
-		      case OPTIONS.Line:
-		      	Debug.Log("Calculating Line with "+target.points.length+" points.");
-		      	target.pointsData = new Array(Line(target.points,dt));
-		      	target.dirty = false;
-		        break;
-		      case OPTIONS.BezierCurve:
-		      	Debug.Log("Calculating BezierCurve with "+target.points.length+" points.");
-		        target.pointsData = new Array(BezierCurve(target.points,dt));
-		    	target.dirty = false;
-		        break;
-		    }
-		}*/
 	}
 
 	function OnSceneGUI () {
@@ -77,5 +54,33 @@ class CurveManagerEditor extends Editor {
 		}
 	}
 
+	function ShowPoints () {
+		EditorGUILayout.BeginVertical();
+				for (var i=0; i<target.points.length; i++) {
+					EditorGUILayout.BeginHorizontal();
+						//Vector3 edit fields 
+			      		target.points[i].transform.position = EditorGUILayout.Vector3Field("Waypoint "+i+":", target.points[i].transform.position);
+
+			      		//Select button
+			      		if(GUILayout.Button ("Select")) Selection.activeTransform = target.points[i].transform;
+
+
+			      		//Remove point button
+						if(GUILayout.Button ("-")) {
+							DestroyImmediate(target.points[i]);
+							target.points.RemoveAt(i);
+						}
+		      		EditorGUILayout.EndHorizontal();
+		      		if (GUI.changed)  {
+						target.dirty=true;
+						EditorUtility.SetDirty (target);
+					}
+				}
+			EditorGUILayout.EndVertical();
+	}
+
+	function ShowAttached () {
+
+	}
 
 }
