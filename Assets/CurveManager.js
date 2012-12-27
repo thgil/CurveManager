@@ -78,15 +78,12 @@ function cleanUp () {
 		}
 	}
 
-	
 	if(ilength==0) {
-		//var children = new List();
+		var children = new Array();
 		var child: Transform;
-		for (child in transform)
-			if(child.gameObject.name == "Point")
-		 		DestroyImmediate(child.gameobject);
-		//for (child in children) Destroy(child);
-		//children.ForEach(child => Destroy(child));
+		for (child in transform) children.Add(child.gameObject);
+		for (i = 0; i < children.length; i++) 
+			if(children[i].name == "Point") DestroyImmediate(children[i]);
 	}
 }
 
