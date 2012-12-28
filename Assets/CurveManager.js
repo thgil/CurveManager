@@ -1,4 +1,5 @@
 //#pragma strict
+import System.Collections.Generic;
 
 @script AddComponentMenu ("Paths/CurveManger")
 
@@ -8,11 +9,12 @@ enum OPTIONS {
     	BezierCurve = 1
   	}
 
-static var op : OPTIONS;
-var points = new Array(); // Contains waypoints
-var pointsData = new Array(); // Contains points on curves
-var attachedGameObjects = new Array(); // Contains gameobjects that will follow the path.
-
+var op : OPTIONS;
+//var points : Array = new Array(); // Contains waypoints (GameObjects)
+var points = new List.<GameObject>();
+//var pointsData : Array = new Array(); // Contains points on curves (Vector3)
+var pointsData = new List.<Vector3>();
+//var attachedGameObjects : Array = new Array(); // Contains gameobjects that will follow the path.
 var dirty : boolean = true; // Do we need to recalculate everything?
 var dt : float = 0.1; // Size of step
 
@@ -21,7 +23,10 @@ var oldTransform;
 oldTransform = transform.position;
 
 function Start () {
-
+	//Debug.Log("points at start:"+ points.length);
+	//Debug.Log("pointsData at start:"+ pointsData.length);
+	for(var point in pointsData) Debug.Log(point);
+	Debug.Log("ANYTHING: "+pointsData);
 }
 
 function Update () {
@@ -29,18 +34,24 @@ function Update () {
 
 function OnDrawGizmos () {
 
-	cleanUp();
-
+	//cleanUp();
+var tmppointsData;
 	if(dirty) {
 		switch(op) {
 	      case OPTIONS.Line:
-	      	Debug.Log("Calculating Line with "+points.length+" points.");
-	      	pointsData = new Array(Line(points,dt));
+	      	//Debug.Log("Calculating Line with "+points.length+" points.");
+	      	//pointsData = new Array(Line(points,dt));
+	      	pointsData.Clear();
+	      	Line(points,dt,pointsData);
 	      	dirty = false;
 	        break;
 	      case OPTIONS.BezierCurve:
-	      	Debug.Log("Calculating BezierCurve with "+points.length+" points.");
-	        pointsData = new Array(BezierCurve(points,dt));
+	      	//Debug.Log("Calculating BezierCurve with "+points.length+" points.");
+	        //pointsData = new Array(BezierCurve(points,dt));
+	        //tmppointsData = new List.<Vector3>(BezierCurve( points,dt));
+	        pointsData.Clear();
+	        BezierCurve(points,dt,pointsData);
+	        //for(var point in tmppointsData) {pointsData.Add(point);Debug.Log("point: "+point);}
 	    	dirty = false;
 	        break;
 	    }
@@ -51,14 +62,14 @@ function OnDrawGizmos () {
 		dirty=true;
 	}
 
-    for (i=0; i< pointsData.length-1; i++) {
+    for (i=0; i< pointsData.Count-1; i++) {
       Gizmos.color = Color.white;
       Gizmos.DrawLine (pointsData[i], pointsData[i+1]);
     }
 
-    for (i=0; i< points.length; i++) {
+    for (i=0; i< points.Count; i++) {
       Gizmos.color = Color.green;
-      if(i!=points.length-1)Gizmos.DrawLine (points[i].transform.position, points[i+1].transform.position);
+      if(i!=points.Count-1)Gizmos.DrawLine (points[i].transform.position, points[i+1].transform.position);
       Handles.Label (points[i].transform.position + Vector3.up*2,"Waypoint "+i);
     }
 }
@@ -88,30 +99,31 @@ function cleanUp () {
 }
 
 // Gets points for Line.
-function Line (points, dt:float) : Array {
-	var data = new Array();
-	for (var i =0; i< points.length-1; i++) {
+function Line (points, dt:float, data) {
+	for (var i =0; i< points.Count-1; i++) {
 		for(var t=0.0; t<=1.0; t+=dt) data.Add( points[i].transform.position + t *(points[i+1].transform.position-points[i].transform.position) );
 	}
-	return data;
 }
 
 // Gets points stepping dt each time.
-function BezierCurve(points, dt:float) : Array {
-	var data = new Array();
+function BezierCurve(points, dt:float, data) {
 	for( var t =0.0; t<=1.0; t+=dt) data.Add( BezierPointOnCurve(points,t) );
-	return data;
 }
 
 // Gets point at time t.
 function BezierPointOnCurve(points, t:float) : Vector3 {
-	if(points.length<1) {Debug.Log("Bezier needs more points!"); return Vector3.zero;}
-	else if(points.length==1) return points[0].transform.position;
+	if(points.Count<1) {Debug.LogWarning("Bezier needs more points!"); return Vector3.zero;}
+	else if(points.Count==1) return points[0].transform.position;
 	else {
 		//Make this nicer.
-		var tmp1 = new Array(points);
-		var tmp2 = new Array(points);
-		tmp1.RemoveAt(points.length-1);
+		var tmp1 = new List.<GameObject>();
+		var tmp2 = new List.<GameObject>();
+		for (var i = 0; i < points.Count; i++) {
+			tmp1.Add(points[i]);
+			tmp2.Add(points[i]);
+		}
+		//var tmp2 = new Array(points);
+		tmp1.RemoveAt(tmp1.Count-1);
 		tmp2.RemoveAt(0);
 		return (1-t)*BezierPointOnCurve(tmp1,t) + t*BezierPointOnCurve(tmp2,t);
 	}

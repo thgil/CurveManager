@@ -42,8 +42,8 @@ class CurveManagerEditor extends Editor {
 
 	function OnSceneGUI () {
 	
-    	for (i=0; i< target.pointsData.length; i++) {
-      		Handles.color = Color.red;
+    	for (i=0; i< target.pointsData.Count; i++) {
+      		//Handles.color = Color.red;
        		Handles.CubeCap(0, target.pointsData[i], Quaternion.identity, 0.1);
     	}
 
@@ -56,7 +56,7 @@ class CurveManagerEditor extends Editor {
 
 	function ShowPoints () {
 		EditorGUILayout.BeginVertical();
-				for (var i=0; i<target.points.length; i++) {
+				for (var i=0; i<target.points.Count; i++) {
 					EditorGUILayout.BeginHorizontal();
 						//Vector3 edit fields 
 			      		target.points[i].transform.position = EditorGUILayout.Vector3Field("Waypoint "+i+":", target.points[i].transform.position);
